@@ -4,29 +4,30 @@ import java.awt.Point;
 import java.io.Serializable;
 
 public abstract class GameObject implements Serializable {
-    private Point position;
+    private int x, y;
     private int length, width;
 
     public GameObject(int length, int width) {
         this.length = length;
         this.width = width;
-        position = new Point(0, 0);
+        x =0; y = 0;
     }
 
     public void setPosition(Point position) {
-        this.position = position;
+        this.x = position.x;
+        this.y = position.y;
     }
 
     public Point getPosition() {
-        return position;
+        return new Point(x, y);
     }
 
     int getX(){
-        return position.x;
+        return x;
     }
 
     int getY(){
-        return position.y;
+        return y;
     }
 
     public int getLength() {

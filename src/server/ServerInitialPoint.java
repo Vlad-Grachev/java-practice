@@ -28,10 +28,10 @@ public class ServerInitialPoint {
         }
         try {
             ss = new ServerSocket(port, 0, ip);
-            System.out.println("Server start");
+            System.out.println("Server started");
             while (true){
                 cs = ss.accept();
-                System.out.println("Has connected");
+                System.out.println("New connection");
                 IView v = BView.build(cs);
                 IPresenter p = BPresenter.build(m, v);
             }

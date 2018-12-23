@@ -2,8 +2,10 @@ package client.model;
 
 import client.view.IObserver;
 import gameenv.Car;
-import gameenv.GameMap;
-import operations.Request;
+import gameenv.Hurdle;
+import gameenv.PackedHurdle;
+import gameenv.PackedMap;
+import operations.Operation;
 import operations.Response;
 
 import java.io.*;
@@ -12,12 +14,13 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
-import static operations.Request.MOVE_LEFT;
-import static operations.Request.MOVE_RIGHT;
+import static gameenv.EnvProperties.maxNumPlayers;
+import static operations.Operation.*;
 
 public class Model {
-    private ArrayList<Car> cars = null;
-    private GameMap gameMap = null;
+    //private ArrayList<Car> cars = null;
+    private PackedMap packedMap = null;
+    private static boolean allPlayersConnected = false;
 
     int port = 5676;
     InetAddress ip = null;
@@ -27,25 +30,36 @@ public class Model {
 
     private ArrayList<IObserver> list_o = new ArrayList<>();
 
-    public int addPlayer(IObserver o)
-    {
-        list_o.add(o);
-        return getId();
+    public int addNewUser(IObserver o, Operation op){
+        addObserver(o);
+        try {
+            if (op == NEW_PLAYER) {
+                oos.writeObject(op);
+                int id = getId();
+                if(id == maxNumPlayers - 1)
+                    allPlayersConnected = true;
+                return id;
+            } else if (op == NEW_OBSERVER) {
+                oos.writeObject(op);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return -1;
     }
 
-    public void addViewer(IObserver o)
-    {
+    public void addObserver(IObserver o){
         list_o.add(o);
     }
+
     private void refresh()
     {
         for (IObserver observer : list_o) {
-            observer.refresh();
+            observer.updateView();
         }
     }
 
-    public void init()
-    {
+    public void createStreams(){
         if(cs != null) return;
         try {
             ip = InetAddress.getLocalHost();
@@ -53,27 +67,75 @@ public class Model {
             ex.printStackTrace();
         }
         try {
-
             cs = new Socket(ip, port);
-            System.out.append("Client start \n");
+            System.out.println("Client started");
 
-            ois = new ObjectInputStream(cs.getInputStream());
             oos = new ObjectOutputStream(cs.getOutputStream());
+            ois = new ObjectInputStream(cs.getInputStream());
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        //refresh();
+    }
+
+    public void startListening() {
+        new Thread(){
+            @Override
+            public void run() {
+                try {
+                    while(true) {
+                            Operation op = (Operation) ois.readObject();
+                            if (op == RECEIVE_CARS) {
+                                packedMap = (PackedMap) ois.readObject();
+                                refresh();
+                            }
+                            if (op == STOP) {
+                                break;
+                            }
+                        }
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }}.start();
+    }
+
+    public void init() {
+        if(cs != null) return;
+        try {
+            ip = InetAddress.getLocalHost();
+        } catch (UnknownHostException ex) {
+            ex.printStackTrace();
+        }
+        try {
+            cs = new Socket(ip, port);
+            System.out.println("Client start \n");
+
+            oos = new ObjectOutputStream(cs.getOutputStream());
+            ois = new ObjectInputStream(cs.getInputStream());
+
+            boolean[] allconn = {allPlayersConnected};
 
             new Thread(){
                 @Override
                 public void run() {
                     try {
-                        while(true)
-                        {
-                            Response resp = (Response) ois.readObject();
-                            if(resp == Response.RECEIVE_CARS){
-                                gameMap = (GameMap) ois.readObject();
-                                cars = gameMap.getCars();
-                            }
-                            if(resp == Response.STOP)
-                            {
-                                break;
+                        while(true) {
+                            if(allconn[0]) {
+                                Operation op = (Operation) ois.readObject();
+                                System.out.println("hello from init2");
+                                if (op == RECEIVE_CARS) {
+                                    System.out.println("hello from init2");
+                                    packedMap = (PackedMap) ois.readObject();
+                                    for(PackedHurdle hurdle: packedMap.getHurdles())
+                                        System.out.println(hurdle.x + " " + hurdle.y);
+                                    //cars = packedMap.getCars();
+                                    refresh();
+                                }
+                                if (op == STOP) {
+                                    break;
+                                }
                             }
                         }
                     } catch (IOException ex) {
@@ -101,12 +163,12 @@ public class Model {
         return id;
     }
 
-    public ArrayList<Car> getCars(){
-        return cars;
-    }
+//    public ArrayList<Car> getCars(){
+//        return cars;
+//    }
 
-    public GameMap getGameMap() {
-        return gameMap;
+    public PackedMap getPackedMap() {
+        return packedMap;
     }
 
     public void moveCarLeft(){
@@ -125,7 +187,7 @@ public class Model {
         }
     }
 
-    public void sendReq(Request req)
+    public void sendReq(Operation req)
     {
         if(cs == null) return;
         try {

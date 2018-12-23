@@ -1,7 +1,7 @@
 package server.model;
 
 import gameenv.Car;
-import gameenv.GameMap;
+import gameenv.PackedMap;
 import server.presenter.IPresenter;
 
 import java.util.ArrayList;
@@ -15,6 +15,7 @@ public interface IServer {
     void moveCarRight(int ownerId);
     void startHurdleGeneration();
     ArrayList<Car> getCars();
-    GameMap getGameMap();
+    PackedMap getPackedMap();
+    PackedMap packMap();
 
 }

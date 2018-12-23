@@ -25,7 +25,7 @@ public class Lane extends GameObject{
         }
     }
 
-    public boolean isHurdleOutfLane(){
+    public boolean isHurdleOutOfLane(){
         if(hurdles.size() == 0)
             return false;
         Hurdle h = hurdles.get(0);

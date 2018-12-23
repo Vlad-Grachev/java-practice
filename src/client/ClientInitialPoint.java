@@ -1,5 +1,6 @@
 package client;
 
+import client.model.BModel;
 import client.view.View;
 
 import javax.swing.*;
@@ -9,6 +10,7 @@ public class ClientInitialPoint {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
+                BModel.model().createStreams();
                 new View();
             }
         });

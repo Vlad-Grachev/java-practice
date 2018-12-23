@@ -1,7 +1,6 @@
 package client.paintedobjects;
 
-import gameenv.Car;
-import gameenv.Hurdle;
+import gameenv.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,14 +9,14 @@ import java.awt.geom.Rectangle2D;
 public class PaintedHurdle extends JComponent {
     private Graphics2D g2d;
     private Rectangle2D rect;
-    int x, y, w, l;
-    Color color;
+    public int x, y, w, l;
+    public Color color;
 
-    public PaintedHurdle(Hurdle hurdle){
-        x = hurdle.getPosition().x;
-        y = hurdle.getPosition().y;
-        l = hurdle.getLength();
-        w = hurdle.getWidth();
+    public PaintedHurdle(PackedHurdle hurdle){
+        x = hurdle.x;
+        y = hurdle.y;
+        l = EnvProperties.hurdleLength;
+        w = EnvProperties.laneWidth;
         this.color = Color.black;
     }
 
@@ -27,5 +26,16 @@ public class PaintedHurdle extends JComponent {
         rect = new Rectangle2D.Double(x, y, w, l);
         g2d.setPaint(color);
         g2d.fill(rect);
+    }
+
+    @Override
+    public String toString() {
+        return "PaintedHurdle{" +
+                "x=" + x +
+                ", y=" + y +
+                ", w=" + w +
+                ", l=" + l +
+                ", color=" + color +
+                '}';
     }
 }

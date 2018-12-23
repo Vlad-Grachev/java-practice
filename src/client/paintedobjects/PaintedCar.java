@@ -1,22 +1,25 @@
 package client.paintedobjects;
 
 import gameenv.Car;
+import gameenv.EnvProperties;
+import gameenv.PackedCar;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
+import java.io.Serializable;
 
-public class PaintedCar extends JComponent {
+public class PaintedCar extends JComponent implements Serializable {
     private Graphics2D g2d;
     private Rectangle2D rect;
-    int x, y, w, l;
-    Color color;
+    public int x, y, w, l;
+    public Color color;
 
-    public PaintedCar(Car car, Color color){
-        x = car.getPosition().x;
-        y = car.getPosition().y;
-        l = car.getLength();
-        w = car.getWidth();
+    public PaintedCar(PackedCar car, Color color){
+        x = car.x;
+        y = car.y;
+        l = EnvProperties.carLength;
+        w = EnvProperties.carWidth;
         this.color = color;
     }
 
@@ -26,5 +29,16 @@ public class PaintedCar extends JComponent {
         rect = new Rectangle2D.Double(x, y, w, l);
         g2d.setPaint(color);
         g2d.fill(rect);
+    }
+
+    @Override
+    public String toString() {
+        return "PaintedCar{" +
+                "x=" + x +
+                ", y=" + y +
+                ", w=" + w +
+                ", l=" + l +
+                ", color=" + color +
+                '}';
     }
 }

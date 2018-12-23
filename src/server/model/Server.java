@@ -1,9 +1,6 @@
 package server.model;
 
-import gameenv.Car;
-import gameenv.GameMap;
-import gameenv.Hurdle;
-import gameenv.Lane;
+import gameenv.*;
 import operations.Status;
 import server.presenter.IPresenter;
 
@@ -14,7 +11,7 @@ import java.util.Random;
 
 public class Server implements IServer {
     private ArrayList<IPresenter> presenters = new ArrayList<>();
-    private GameMap gameMap = null;
+    private PackedMap packedMap = null;
     private ArrayList<Car> cars = new ArrayList<>();
     private ArrayList<Lane> lanes = new ArrayList<>();
     private int hurdleCount = 0;
@@ -32,8 +29,8 @@ public class Server implements IServer {
         return cars;
     }
 
-    public GameMap getGameMap() {
-        return gameMap;
+    public PackedMap getPackedMap() {
+        return packedMap;
     }
 
     public void removeCar(Car car) {
@@ -49,7 +46,7 @@ public class Server implements IServer {
     public void moveCarRight(int ownerId) {
         Car car = cars.get(ownerId);
         if (car.getLaneId() + 1 < 4)
-            car.changeLane(lanes.get(car.getLaneId() - 1));
+            car.changeLane(lanes.get(car.getLaneId() + 1));
     }
 
     public void startHurdleGeneration(){
@@ -67,13 +64,23 @@ public class Server implements IServer {
         presenters.remove(p);
     }
 
-    public void refresh() {
-        ArrayList<Hurdle> hurdles = new ArrayList<>();
+    public PackedMap packMap(){
+        ArrayList<PackedHurdle> packedHurdles = new ArrayList<>();
         for(Lane lane: lanes){
-            for(Hurdle hurdle: lane.getHurdles())
-                hurdles.add(hurdle);
+            for(Hurdle hurdle: lane.getHurdles()) {
+                packedHurdles.add(new PackedHurdle(hurdle));
+            }
         }
-        gameMap = new GameMap(hurdles, cars);
+        ArrayList<PackedCar> packedCars = new ArrayList<>();
+        for(Car car: cars){
+            packedCars.add(new PackedCar(car));
+        }
+        packedMap = new PackedMap(packedHurdles, packedCars);
+        return packedMap;
+    }
+
+    public void refresh() {
+        packMap();
         for (IPresenter presenter : presenters) {
             presenter.update();
         }
@@ -95,29 +102,26 @@ public class Server implements IServer {
                         int laneId = random.nextInt(4);
                         hurdleCount++;
                         lanes.get(laneId).addHurdle(new Hurdle(laneId));
-                        System.out.println("New hurdle at lane: " + laneId);
                     } else {
-                        System.out.println("Checking intersections");
                         for (Lane lane : lanes) {
                             lane.moveHurdlesDown();
-                            if (lane.isHurdleOutfLane()) {
+                            if (lane.isHurdleOutOfLane()) {
                                 lane.removeHurdle();
                                 hurdleCount--;
                             }
                         }
                         int i = 0;
                         while (i < cars.size()){
-                            if(cars.get(i).getStatus() == Status.CAR_CRUSHED){
-                                System.out.println("Player " + cars.get(i) + "lose");
+                            if(cars.get(i).checkStatus() == Status.CAR_CRUSHED){
+                                //System.out.println("Player " + cars.get(i).getOwnerId() + " lose");
                                 cars.remove(i);
                             }
                             else
                                 i++;
                         }
-
                     }
-                    refresh();
                 }
+                refresh();
             };
         }
     }

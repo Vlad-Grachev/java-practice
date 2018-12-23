@@ -1,14 +1,11 @@
 package server.view;
 
-import gameenv.Car;
-import gameenv.GameMap;
-import operations.Request;
-
-import java.util.ArrayList;
+import gameenv.PackedMap;
+import operations.Operation;
 
 public interface IView {
-    Request getReq();
-    void setOp(Request req);
+    Operation getOp();
+    void setOp(Operation op);
     void sendId(int id);
-    void sendGameMap(GameMap cars);
+    void sendGameMap(PackedMap cars);
 }

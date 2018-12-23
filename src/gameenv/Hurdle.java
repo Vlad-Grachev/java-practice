@@ -1,8 +1,10 @@
 package gameenv;
 
 import java.awt.*;
+import java.io.Serializable;
 
-public class Hurdle extends GameObject{
+public class Hurdle extends GameObject implements Serializable {
+    public int hy;
     public Hurdle(int laneId){
         super(EnvProperties.hurdleLength, EnvProperties.laneWidth);
         setPosition(new Point(getWidth() * laneId, 0));
@@ -17,9 +19,12 @@ public class Hurdle extends GameObject{
         return intersection;
     }
     public void moveDown(){
-        getPosition().y += EnvProperties.hurdleStep;
+        Point newPosition = getPosition();
+        newPosition.y += EnvProperties.hurdleStep;
+        setPosition(newPosition);
     }
     public boolean isInFrame(){
         return (getPosition().y + 1 > EnvProperties.laneLength);
     }
+
 }

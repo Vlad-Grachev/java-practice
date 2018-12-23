@@ -3,8 +3,9 @@ package gameenv;
 import operations.Status;
 
 import java.awt.*;
+import java.io.Serializable;
 
-public class Car extends GameObject {
+public class Car extends GameObject implements Serializable {
     private Lane lane;
     private int ownerId;
     private Status carStatus = Status.CAR_OK;
