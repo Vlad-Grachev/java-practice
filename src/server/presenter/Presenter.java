@@ -47,6 +47,7 @@ public class Presenter implements IPresenter {
                         m.moveCarRight(id);
                     }
                     if (op == STOP) {
+                        System.out.println("Client disconnected");
                         m.removePresenter(p);
                     }
                 }
@@ -55,7 +56,11 @@ public class Presenter implements IPresenter {
     }
 
     public void update() {
-        v.setOp(RECEIVE_CARS);
-        v.sendGameMap(m.getPackedMap());
+        if(m.isGameOn()){
+            v.setOp(RECEIVE_CARS);
+            v.sendGameMap(m.getPackedMap());
+        } else {
+            v.setOp(STOP);
+        }
     }
 }

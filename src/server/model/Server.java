@@ -15,6 +15,7 @@ public class Server implements IServer {
     private ArrayList<Car> cars = new ArrayList<>();
     private ArrayList<Lane> lanes = new ArrayList<>();
     private int hurdleCount = 0;
+    private boolean gameOn = false;
 
     public Server() {
         for (int i = 0; i < 4; i++)
@@ -27,6 +28,10 @@ public class Server implements IServer {
 
     public ArrayList<Car> getCars(){
         return cars;
+    }
+
+    public boolean isGameOn() {
+        return gameOn;
     }
 
     public PackedMap getPackedMap() {
@@ -52,6 +57,7 @@ public class Server implements IServer {
     public void startHurdleGeneration(){
         GameTimer t = new GameTimer();
         t.startTimer();
+        gameOn = true;
     }
 
     @Override
@@ -120,6 +126,9 @@ public class Server implements IServer {
                                 i++;
                         }
                     }
+                } else {
+                    gameOn = false;
+                    timer.stop();
                 }
                 refresh();
             };

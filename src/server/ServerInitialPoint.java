@@ -14,7 +14,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 public class ServerInitialPoint {
-    private int port = 5676;
+    private int port = 5676;;
     private InetAddress ip = null;
 
     public void startServer(){

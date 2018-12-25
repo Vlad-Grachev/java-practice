@@ -6,7 +6,6 @@ import gameenv.Hurdle;
 import gameenv.PackedHurdle;
 import gameenv.PackedMap;
 import operations.Operation;
-import operations.Response;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -18,8 +17,8 @@ import static gameenv.EnvProperties.maxNumPlayers;
 import static operations.Operation.*;
 
 public class Model {
-    //private ArrayList<Car> cars = null;
     private PackedMap packedMap = null;
+    private boolean gameOn = false;
     private static boolean allPlayersConnected = false;
 
     int port = 5676;
@@ -52,6 +51,10 @@ public class Model {
         list_o.add(o);
     }
 
+    public boolean isGameOn(){
+        return gameOn;
+    }
+
     private void refresh()
     {
         for (IObserver observer : list_o) {
@@ -75,7 +78,6 @@ public class Model {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
-        //refresh();
     }
 
     public void startListening() {
@@ -83,6 +85,7 @@ public class Model {
             @Override
             public void run() {
                 try {
+                    gameOn = true;
                     while(true) {
                             Operation op = (Operation) ois.readObject();
                             if (op == RECEIVE_CARS) {
@@ -90,6 +93,9 @@ public class Model {
                                 refresh();
                             }
                             if (op == STOP) {
+                                gameOn = false;
+                                sendReq(STOP);
+                                refresh();
                                 break;
                             }
                         }
@@ -101,58 +107,6 @@ public class Model {
             }}.start();
     }
 
-    public void init() {
-        if(cs != null) return;
-        try {
-            ip = InetAddress.getLocalHost();
-        } catch (UnknownHostException ex) {
-            ex.printStackTrace();
-        }
-        try {
-            cs = new Socket(ip, port);
-            System.out.println("Client start \n");
-
-            oos = new ObjectOutputStream(cs.getOutputStream());
-            ois = new ObjectInputStream(cs.getInputStream());
-
-            boolean[] allconn = {allPlayersConnected};
-
-            new Thread(){
-                @Override
-                public void run() {
-                    try {
-                        while(true) {
-                            if(allconn[0]) {
-                                Operation op = (Operation) ois.readObject();
-                                System.out.println("hello from init2");
-                                if (op == RECEIVE_CARS) {
-                                    System.out.println("hello from init2");
-                                    packedMap = (PackedMap) ois.readObject();
-                                    for(PackedHurdle hurdle: packedMap.getHurdles())
-                                        System.out.println(hurdle.x + " " + hurdle.y);
-                                    //cars = packedMap.getCars();
-                                    refresh();
-                                }
-                                if (op == STOP) {
-                                    break;
-                                }
-                            }
-                        }
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-            }.start();
-
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        refresh();
-    }
-
     private int getId() {
         int id = -1;
         try {
@@ -162,10 +116,6 @@ public class Model {
         }
         return id;
     }
-
-//    public ArrayList<Car> getCars(){
-//        return cars;
-//    }
 
     public PackedMap getPackedMap() {
         return packedMap;

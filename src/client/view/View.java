@@ -2,19 +2,12 @@ package client.view;
 
 import client.model.BModel;
 import client.model.Model;
-import client.paintedobjects.PaintedCar;
-import client.paintedobjects.PaintedHurdle;
 import client.paintedobjects.PaintedMap;
-import gameenv.PackedMap;
 import operations.Operation;
 
 import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.ArrayList;
 
 public class View extends JFrame implements IObserver {
     private int id = -1;
@@ -58,15 +51,23 @@ public class View extends JFrame implements IObserver {
 
     @Override
     public void updateView(){
-        if(paintedMap == null) {
-            paintedMap = new PaintedMap(m.getPackedMap());
-            add(paintedMap);
-            //thisFrame.invalidate();
-            setVisible(true);
+        if(paintedMap != null) {
+            if(m.isGameOn()){
+                paintedMap.setMap(m.getPackedMap());
+            } else {
+                endGame();
+            }
         }
         else {
-            paintedMap.setMap(m.getPackedMap());
-            thisFrame.invalidate();
+            paintedMap = new PaintedMap(m.getPackedMap());
+            add(paintedMap);
+            setVisible(true);
         }
+    }
+
+    public void endGame(){
+        setVisible(false);
+        new EndDialog(this);
+        System.exit(0);
     }
 }

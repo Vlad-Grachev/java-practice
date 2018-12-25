@@ -10,6 +10,7 @@ public interface IServer {
     void addPresenter(IPresenter p);
     void removePresenter(IPresenter p);
     void refresh();
+    boolean isGameOn();
     void addCar(int ownerId);
     void moveCarLeft(int ownerId);
     void moveCarRight(int ownerId);

@@ -1,7 +1,7 @@
 package gameenv;
 
 public class EnvProperties {
-        public static int maxNumPlayers = 2;
+        public static int maxNumPlayers = 1;
         public static int laneLength = 600;
         public static int laneWidth = 85;
         public static int carLength = 113;
